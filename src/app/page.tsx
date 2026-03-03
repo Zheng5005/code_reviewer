@@ -5,17 +5,17 @@ import Link from "next/link";
 export default function Home() {
   return (
     <div className="flex min-h-screen items-center justify-center">
-      <div className="flex min-h-screen items-center justify-center">
+      <div className="">
         <h1>Welcome to AIreviewer</h1>
         <p>Start reviewing your code today!</p>
       </div>
 
       <div className="flex gap-4">
         <Button asChild>
-          <Link href="/login">Login</Link>
+          <Link href="/sign-in">Login</Link>
         </Button>
         <Button asChild>
-          <Link href="/login">Login</Link>
+          <Link href="/sign-up">Sign Up</Link>
         </Button>
       </div>
       <HealthCheck />
