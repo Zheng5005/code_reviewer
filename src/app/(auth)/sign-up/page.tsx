@@ -1,10 +1,10 @@
 "use client";
 
-import { FaGithub } from "react-icons/fa"
+import { FaGithub } from "react-icons/fa";
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { signIn } from "@/lib/auth-client";
+import { signIn, signUp } from "@/lib/auth-client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -16,9 +16,11 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import { set } from "zod";
 
-export default function SignInPage() {
+export default function SignUpPage() {
   const router = useRouter();
+  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -29,7 +31,8 @@ export default function SignInPage() {
     setError("");
     setLoading(true);
 
-    const result = await signIn.email({
+    const result = await signUp.email({
+      name,
       email,
       password,
     });
@@ -49,16 +52,16 @@ export default function SignInPage() {
     await signIn.social({
       provider: "github",
       callbackURL: "/repos",
-    })
-  }
+    });
+  };
 
   return (
     <div className="flex min-h-screen items-center justify-center p-4">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
-          <CardTitle className="text-2xl">Sign In</CardTitle>
+          <CardTitle className="text-2xl">Sign Up</CardTitle>
           <CardDescription>
-            Sign in with your email or GitHub account.
+            Sign up with your email or GitHub account.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -69,7 +72,7 @@ export default function SignInPage() {
             disabled={loading}
           >
             <FaGithub className="mr-2 size-4" />
-            Sign in with GitHub
+            Sign up with GitHub
           </Button>
 
           <div className="relative">
@@ -84,6 +87,17 @@ export default function SignInPage() {
           </div>
 
           <form onSubmit={handleEmailSignIn} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="name">Name</Label>
+              <Input
+                id="name"
+                type="text"
+                placeholder="John Doe"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                disabled={loading}
+              />
+            </div>
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
               <Input
@@ -110,12 +124,12 @@ export default function SignInPage() {
             {error && <p className="text-red-500">{error}</p>}
 
             <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? "Loading..." : "Sign In"}
+              {loading ? "Loading..." : "Sign Up"}
             </Button>
           </form>
 
           <p className="text-center text-sm text-muted-foreground">
-            Don&apos;t have an account? <Link href="/sign-up">Sign Up</Link>
+            Already have an account? <Link href="/sign-in">Sign In</Link>
           </p>
         </CardContent>
       </Card>
