@@ -2,8 +2,8 @@ import { z } from "zod";
 import { TRPCError } from "@trpc/server";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 import {
-  fetchGithubRepos,
-  getGithubAccessToken,
+  fetchGitHubRepos,
+  getGitHubAccessToken,
 } from "@/server/services/github";
 
 export const repositoryRouter = createTRPCRouter({
@@ -16,7 +16,7 @@ export const repositoryRouter = createTRPCRouter({
   }),
 
   fetchGitHub: protectedProcedure.query(async ({ ctx }) => {
-    const accessToken = await getGithubAccessToken(ctx.user.id);
+    const accessToken = await getGitHubAccessToken(ctx.user.id);
 
     if (!accessToken) {
       throw new TRPCError({
@@ -25,7 +25,7 @@ export const repositoryRouter = createTRPCRouter({
       })
     }
 
-    const repo = await fetchGithubRepos(accessToken);
+    const repo = await fetchGitHubRepos(accessToken);
     return repo.map((repo) => ({
       githubId: repo.id,
       name: repo.name,
