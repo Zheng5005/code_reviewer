@@ -22,6 +22,7 @@ import {
   Loader2,
   GitBranch,
   ArrowRight,
+  Wand2,
   ScanSearch,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -45,6 +46,31 @@ export default function PullRequestDetailPage({ params }: PageProps) {
     { repositoryId: id, prNumber: prNum },
     { enabled: !isNaN(prNum) },
   );
+
+  const latestReview = trpc.review.getLatestForPR.useQuery(
+    { repositoryId: id, prNumber: prNum },
+    {
+      enabled: !isNaN(prNum),
+      refetchInterval: (query) => {
+        const status = query.state.data?.status;
+        if (status === "PENDING" || status === "PROCESSING") {
+          return 2000;
+        }
+        return false;
+      },
+    },
+  );
+
+  const triggerReview = trpc.review.trigger.useMutation({
+    onSuccess: () => {
+      latestReview.refetch();
+      pr.refetch();
+    },
+  });
+
+  const isReviewing =
+    latestReview.data?.status === "PENDING" ||
+    latestReview.data?.status === "PROCESSING";
 
   if (pr.isLoading) {
     return (
@@ -215,6 +241,32 @@ export default function PullRequestDetailPage({ params }: PageProps) {
 
             <div className="px-6 py-4 flex items-center gap-3">
               <div className="flex items-center gap-2 rounded-lg px-3 py-1.5">
+                <ReviewStatusBadge
+                  status={latestReview.data?.status ?? null}
+                  completedAt={
+                    latestReview.data?.status === "COMPLETED"
+                      ? latestReview.data.createdAt
+                      : null
+                  }
+                />
+                {!isReviewing && <div className="h-4 w-px bg-border" />}
+                {isReviewing ? null : (
+                  <Button
+                    variant="outline"
+                    size={"sm"}
+                    onClick={() => {
+                      triggerReview.mutate({
+                        repositoryId: id,
+                        prNumber: prNum,
+                      });
+                    }}
+                    disabled={triggerReview.isPending}
+                    className="gap-1.5 h-auto py-1 px-2 text-xs"
+                  >
+                    <Wand2 />
+                    {latestReview.data ? "Re-run" : "Review"}
+                  </Button>
+                )}
               </div>
             </div>
           </div>
@@ -229,7 +281,13 @@ export default function PullRequestDetailPage({ params }: PageProps) {
             onClick={() => setActiveTab("review")}
             icon={ScanSearch}
             label="Reviews"
-            count={0}
+            count={
+              latestReview.data?.status === "COMPLETED"
+                ? Array.isArray(latestReview.data.comments)
+                  ? latestReview.data.comments.length
+                  : 0
+                : 0
+            }
           />
 
           <TabButton
@@ -241,6 +299,37 @@ export default function PullRequestDetailPage({ params }: PageProps) {
           />
         </div>
       </div>
+
+      {/* Tab Content */}
+      {activeTab === "review" && (
+        <div>
+          {latestReview.data ? (
+            null
+          ) : (
+            <Card>
+              <CardContent className="py-16 text-center">
+                <div className="mx-auto size-14 rounded-full bg-primary/10 flex items-center justify-center">
+                  <ScanSearch className="size-7 text-primary" />
+                </div>
+                <p className="mt-4 font-medium">No reviews yet.</p>
+                <p className="text-sm text-muted-foreground mt-1 max-w-sm mx-auto">
+                  Click &quot;Run AI Review&quot; to analyze this pull request
+                  for bugs, security issues, and improvements.
+                </p>
+                <Button
+                  className="mt-6"
+                  onClick={() =>
+                    triggerReview.mutate({ repositoryId: id, prNumber: prNum })
+                  }
+                  disabled={triggerReview.isPending}
+                >
+                  Run AI Review
+                </Button>
+              </CardContent>
+            </Card>
+          )}
+        </div>
+      )}
 
       {activeTab === "files" && (
         <div>
