@@ -27,6 +27,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { DiffViewer } from "@/components/diff-viewer";
+import { ReviewResult } from "@/components/review-result";
 
 type PageProps = {
   params: Promise<{ id: string; prNumber: string }>;
@@ -304,7 +305,7 @@ export default function PullRequestDetailPage({ params }: PageProps) {
       {activeTab === "review" && (
         <div>
           {latestReview.data ? (
-            null
+            <ReviewResult review={latestReview.data} />
           ) : (
             <Card>
               <CardContent className="py-16 text-center">
