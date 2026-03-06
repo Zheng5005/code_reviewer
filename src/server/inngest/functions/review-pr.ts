@@ -1,5 +1,6 @@
 import { inngest } from "../client";
 import { db } from "@/server/db";
+import { reviewCode } from "@/server/services/ai";
 import {
   fetchPullRequest,
   fetchPullRequestFiles,
@@ -88,16 +89,16 @@ export const reviewPR = inngest.createFunction(
     });
 
     const reviewResult = await step.run("generate-review", async () => {
-      return {
-        summary: 'Reviewed',
-        riskScore: Math.floor(Math.random() * 100),
-        comments: files.slice(0, 3).map((file) => ({
-          file: file.filename,
-          line: 1,
-          severity: "low" as const,
-          message: "file"
-        }))
-      }
+      return reviewCode(
+        pr.title,
+        files.map((f) => ({
+          filename: f.filename,
+          status: f.status,
+          additions: f.additions,
+          deletions: f.deletions,
+          patch: f.patch,
+        })),
+      );
     });
 
     await step.run("save-review-result", async () => {
