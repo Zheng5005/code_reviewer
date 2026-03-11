@@ -493,9 +493,9 @@ function ReviewStatusBadge({
   completedAt,
 }: {
   status: string | null;
-  completedAt?: Date | null;
+  completedAt?: Date | string | null;
 }) {
-  const getTimeAgo = (date: Date) => {
+  const getTimeAgo = (date: Date | string) => {
     const now = new Date();
     const diffMs = now.getTime() - new Date(date).getTime();
     const diffMin = Math.floor(diffMs / (1000 * 60));

@@ -24,6 +24,8 @@ import {
   ShieldX,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import type { inferRouterOutputs } from "@trpc/server";
+import type { AppRouter } from "@/server/api/root";
 
 interface ReviewComment {
   file: string;
@@ -34,16 +36,10 @@ interface ReviewComment {
   suggestion?: string;
 }
 
+type ReviewOutput = NonNullable<inferRouterOutputs<AppRouter>["review"]["getLatestForPR"]>;
+
 interface ReviewResultProps {
-  review: {
-    id: string;
-    status: string;
-    summary: string | null;
-    riskScore: number | null;
-    comments: ReviewComment[] | unknown;
-    error: string | null;
-    createdAt: Date;
-  };
+  review: ReviewOutput;
 }
 
 export function ReviewResult({ review }: ReviewResultProps) {
@@ -157,7 +153,7 @@ export function ReviewResult({ review }: ReviewResultProps) {
   }
 
   const comments = Array.isArray(review.comments)
-    ? (review.comments as ReviewComment[])
+    ? (review.comments as unknown as ReviewComment[])
     : [];
 
   const severityCounts = {
