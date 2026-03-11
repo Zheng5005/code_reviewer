@@ -25,8 +25,6 @@ import {
   Globe,
   Lock,
 } from "lucide-react";
-import type { inferRouterOutputs } from "@trpc/server";
-import type { AppRouter } from "@/server/api/root";
 import { cn, formatDate } from "@/lib/utils";
 
 type PageProps = {
@@ -231,11 +229,24 @@ export default function RepositoryDetailPage({ params }: PageProps) {
   );
 }
 
-type PullRequestData =
-  inferRouterOutputs<AppRouter>["pullRequest"]["list"][number];
-
 interface PullRequestCardProps {
-  pr: PullRequestData;
+  pr: {
+    id: number;
+    number: number;
+    title: string;
+    state: "open" | "closed";
+    draft: boolean;
+    htmlUrl: string;
+    author: { login: string; avatarUrl: string };
+    headRef: string;
+    baseRef: string;
+    additions: number;
+    deletions: number;
+    changedFiles: number;
+    createdAt: string;
+    mergedAt: string | null;
+    review: { status: string; createdAt: Date } | null;
+  };
   repositoryId: string;
 }
 

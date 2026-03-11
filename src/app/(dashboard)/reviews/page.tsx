@@ -19,8 +19,6 @@ import {
   RefreshCw,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import type { inferRouterOutputs } from "@trpc/server";
-import type { AppRouter } from "@/server/api/root";
 
 type ReviewStatus = "all" | "COMPLETED" | "PROCESSING" | "PENDING" | "FAILED";
 
@@ -164,10 +162,23 @@ export default function ReviewsPage() {
   );
 }
 
-type ReviewData = inferRouterOutputs<AppRouter>["review"]["list"][number];
-
 interface ReviewCardProps {
-  review: ReviewData;
+  review: {
+    id: string;
+    prNumber: number;
+    prTitle: string;
+    prUrl: string;
+    status: string;
+    summary: string | null;
+    riskScore: number | null;
+    comments: unknown;
+    error: string | null;
+    createdAt: Date;
+    repository: {
+      id: string;
+      fullName: string;
+    };
+  };
   onRetry?: () => void;
 }
 
@@ -404,7 +415,7 @@ function getRiskConfig(score: number) {
   };
 }
 
-function formatRelativeTime(date: Date | string): string {
+function formatRelativeTime(date: Date): string {
   const now = new Date();
   const diffMs = now.getTime() - new Date(date).getTime();
   const diffMins = Math.floor(diffMs / (1000 * 60));
